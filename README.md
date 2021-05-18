@@ -1,4 +1,4 @@
-# PdfWaterMark
+# PdfWaterMark（还没写完，不要拉取！）
 
 #### 项目介绍
 Pdf批量添加水印、盖章的工具，特别适合批量图纸盖LOGO。
