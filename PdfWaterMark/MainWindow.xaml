@@ -5,8 +5,288 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PdfWaterMark"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="PDF文件添加水印、图章" Height="560" Width="680" MinHeight="480" MinWidth="296" WindowStartupLocation="CenterScreen" FontSize="14">
+    <Window.Resources>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="RadioButton.Static.Background" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="RadioButton.Static.Border" Color="#FF707070"/>
+        <Style x:Key="OptionMarkFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="14,0,0,0" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="RadioButton.MouseOver.Background" Color="#FFF3F9FF"/>
+        <SolidColorBrush x:Key="RadioButton.MouseOver.Border" Color="#FF5593FF"/>
+        <SolidColorBrush x:Key="RadioButton.MouseOver.Glyph" Color="#FF212121"/>
+        <SolidColorBrush x:Key="RadioButton.Disabled.Background" Color="#FFE6E6E6"/>
+        <SolidColorBrush x:Key="RadioButton.Disabled.Border" Color="#FFBCBCBC"/>
+        <SolidColorBrush x:Key="RadioButton.Disabled.Glyph" Color="#FF707070"/>
+        <SolidColorBrush x:Key="RadioButton.Pressed.Background" Color="#FFD9ECFF"/>
+        <SolidColorBrush x:Key="RadioButton.Pressed.Border" Color="#FF3C77DD"/>
+        <SolidColorBrush x:Key="RadioButton.Pressed.Glyph" Color="#FF212121"/>
+        <SolidColorBrush x:Key="RadioButton.Static.Glyph" Color="#FF212121"/>
+        <Style x:Key="RadioButtonStyle1" TargetType="{x:Type RadioButton}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Background" Value="{StaticResource RadioButton.Static.Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource RadioButton.Static.Border}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Grid x:Name="templateRoot" Background="Transparent" SnapsToDevicePixels="True">
+                            <Border x:Name="radioButtonBorder" Margin="{TemplateBinding Margin}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}">
+                                <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasContent" Value="true">
+                                <Setter Property="FocusVisualStyle" Value="{StaticResource OptionMarkFocusVisual}"/>
+                                <Setter Property="Padding" Value="4,-1,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.MouseOver.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.MouseOver.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.Disabled.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.Disabled.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.Pressed.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="radioButtonBorder" Value="{StaticResource RadioButton.Pressed.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" TargetName="radioButtonBorder" Value="LightBlue"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20*" MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="30*"/>
+        </Grid.ColumnDefinitions>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="128"/>
+                <RowDefinition Height="82"/>
+                <RowDefinition Height="82"/>
+                <RowDefinition />
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <GroupBox Header="要处理的PDF文件" Margin="5" Grid.Row="0" BorderBrush="Gray">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <RadioButton x:Name="radioButtonFile" Grid.Row="0" Grid.Column="0" GroupName="group1" IsChecked="False" Content="单个文件" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
+                    <Grid Grid.Row="1" Grid.ColumnSpan="2" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="35"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="textBoxPath" Margin="2,0,3,0">
+                            <TextBox.Resources>
+                                <VisualBrush x:Key="HintTextPath" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                                    <VisualBrush.Visual>
+                                        <TextBlock FontStyle="Italic" Text="要处理的文件（夹）路径"/>
+                                    </VisualBrush.Visual>
+                                </VisualBrush>
+                            </TextBox.Resources>
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="{x:Null}">
+                                            <Setter Property="Background" Value="{StaticResource HintTextPath}"/>
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Background" Value="{StaticResource HintTextPath}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <Button x:Name="buttonOpen" Content="..." Margin="1,0,1,0" Grid.Column="1"/>
+                    </Grid>
+                    <RadioButton x:Name="radioButtonFolder" Grid.Row="0"  Grid.Column="1" GroupName="group1" IsChecked="True" Content="文件夹下全部" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
+                    <Grid Grid.Row="3" Grid.ColumnSpan="2" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="35"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="textBoxNewPath" Margin="2,0,3,0">
+                            <TextBox.Resources>
+                                <VisualBrush x:Key="HintTextNewPath" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                                    <VisualBrush.Visual>
+                                        <TextBlock FontStyle="Italic" Text="另存为的文件（夹）路径"/>
+                                    </VisualBrush.Visual>
+                                </VisualBrush>
+                            </TextBox.Resources>
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="{x:Null}">
+                                            <Setter Property="Background" Value="{StaticResource HintTextNewPath}"/>
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Background" Value="{StaticResource HintTextNewPath}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <Button x:Name="buttonSaveAs" Content="..." Margin="1,0,1,0" Grid.Column="1"/>
+                    </Grid>
+                    <RadioButton x:Name="radioButtonSaveReplace" Grid.Row="2" Grid.Column="0" GroupName="group2" IsChecked="False" Content="覆盖保存" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
+                    <RadioButton x:Name="radioButtonSaveAs" Grid.Row="2"  Grid.Column="1" GroupName="group2" IsChecked="True" Content="另存为" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="文件页" Margin="5" Grid.Row="1" BorderBrush="Gray">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <RadioButton x:Name="radioButtonPage1" Grid.Row="0" Grid.Column="0" GroupName="group3" Content="第1页" VerticalAlignment="Center" IsChecked="True"/>
+                    <RadioButton x:Name="radioButtonPageAll" Grid.Row="0" Grid.Column="1" GroupName="group3" Content="全部页面" VerticalAlignment="Center" IsChecked="False" />
+                    <RadioButton x:Name="radioButtonPageSet" Grid.Row="0" Grid.Column="2" GroupName="group3" Content="指定页面" VerticalAlignment="Center" IsChecked="False" />
+                    <TextBox x:Name="textBoxPages" Grid.Row="1" Grid.ColumnSpan="3"  VerticalAlignment="Center">
+                        <TextBox.Resources>
+                            <VisualBrush x:Key="HintTextPages" TileMode="None" Opacity="0.5" Stretch="None" AlignmentX="Left">
+                                <VisualBrush.Visual>
+                                    <TextBlock FontStyle="Italic" Text="各页用空格或,或;隔开，如：1,2,3"/>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </TextBox.Resources>
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource HintTextPages}"/>
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background" Value="{StaticResource HintTextPages}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="水印、印章" Margin="5" Grid.Row="2" BorderBrush="Gray">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <RadioButton x:Name="radioButtonTopLeft" Grid.Row="0" Grid.Column="0" GroupName="group4" Content="左上" VerticalAlignment="Center" IsChecked="False" Style="{DynamicResource RadioButtonStyle1}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <RadioButton x:Name="radioButtonTopRight" Grid.Row="0" Grid.Column="1" GroupName="group4" Content="右上" VerticalAlignment="Center" IsChecked="False" Style="{DynamicResource RadioButtonStyle1}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <RadioButton x:Name="radioButtonBottomLeft" Grid.Row="0" Grid.Column="2" GroupName="group4" Content="左下" VerticalAlignment="Center" IsChecked="False" Style="{DynamicResource RadioButtonStyle1}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <RadioButton x:Name="radioButtonBottomRight" Grid.Row="0" Grid.Column="3" GroupName="group4" Content="右下" VerticalAlignment="Center" IsChecked="True" Style="{DynamicResource RadioButtonStyle1}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <RadioButton x:Name="radioButtonBottomCenter" Grid.Row="0" Grid.Column="4" GroupName="group4" Content="居中" VerticalAlignment="Center" IsChecked="False" Style="{DynamicResource RadioButtonStyle1}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="偏移(px)" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="水平： " VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    <TextBox x:Name="textBoxVerticalOffset" Text="20" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Width="45" />
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="竖直： " VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    <TextBox x:Name="textBoxHorizonalOffset" Text="20" Grid.Row="1" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Width="45" />
+                </Grid>
+            </GroupBox>
+            <Grid Grid.Row="3" Background="LightGray">
+                <Image x:Name="imageLayout" Margin="5"/>
+            </Grid>
+            <Grid Grid.Row="4" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <ProgressBar x:Name="progressBar" Grid.Column="0" Margin="2" />
+                <Button x:Name="buttonStart" Content="开始(_S)" Grid.Column="1" Margin="2" Click="ButtonStart_Click"/>
+                <Button x:Name="buttonAbout" Grid.Column="2" Margin="2" Content="?" FontWeight="Bold" Foreground="White" Click="ButtonAbout_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border BorderThickness="3" BorderBrush="LightGray" CornerRadius="15" Background="Blue">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Grid>
+        <Grid Grid.Column="2" Background="LightGray">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <Image x:Name="imagePreview" Margin="5"/>
+            <Grid Grid.Row="1" Width="140" Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="buttonPrev" Grid.Column="0" Margin="3" Padding="0" Content="&lt;" FontWeight="Bold" Foreground="White" Click="ButtonPrev_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border BorderThickness="1" BorderBrush="Blue" CornerRadius="15" Background="Blue">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button x:Name="buttonNext" Grid.Column="3" Margin="3" Padding="0" Content="&gt;" FontWeight="Bold" Foreground="White" Click="ButtonNext_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border BorderThickness="1" BorderBrush="Blue" CornerRadius="15" Background="Blue">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <TextBox x:Name="textBoxCurrentPage" Text="1" Grid.Column="1" Margin="3" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <TextBlock x:Name="textBlockPageNum" Text="/ 100" Grid.Column="2" Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

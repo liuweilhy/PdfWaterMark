@@ -24,5 +24,26 @@ namespace PdfWaterMark
         {
             InitializeComponent();
         }
+
+        private void ButtonStart_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("ButtonStart_Click");
+        }
+
+        private void ButtonAbout_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("ButtonAbout_Click");
+        }
+
+        private void ButtonPrev_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("ButtonPrev_Click");
+        }
+
+        private void ButtonNext_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("ButtonNext_Click");
+        }
+
     }
 }
