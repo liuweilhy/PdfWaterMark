@@ -1,0 +1,31 @@
+﻿<TextBox x:Class="PdfWaterMark.TipTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PdfWaterMark"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="300" Name="MyTextBox">
+    <TextBox.Background>
+        <VisualBrush Stretch="None" AlignmentX="Left">
+            <VisualBrush.Visual>
+                <Border Background="{Binding ElementName=MyTextBox, Path=Background}" Width="{Binding ElementName=MyTextBox, Path=ActualWidth}" Height="{Binding ElementName=MyTextBox, Path=ActualHeight}">
+                    <TextBlock Margin="{Binding ElementName=MyTextBox, Path=Margin}" Text="{Binding ElementName=MyTextBox, Path=TipText}" VerticalAlignment="{Binding ElementName=MyTextBox, Path=VerticalContentAlignment}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Opacity" Value="0"></Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=MyTextBox, Path=Text}" Value="">
+                                        <Setter Property="Opacity" Value="0.5"/>
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+            </VisualBrush.Visual>
+        </VisualBrush>
+    </TextBox.Background>
+</TextBox>
+    
