@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,67 +20,124 @@ namespace PdfWaterMark
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         #region  私有变量
+
+        private List<string> sourceFilePathList = new List<string>();
+
+        private List<string> destinationFilePathList = new List<string>();
+
+        private List<int> pageList = new List<int>();
+
+        #endregion
+
+        #region 属性
         /// <summary>
         /// 仅处理单文件，否则处理文件夹下所有pdf文件
         /// </summary>
-        private bool isSigleFile = false;
+        public bool IsSigleFile { get; set; } = false;
 
         /// <summary>
         /// 覆盖保存，否则另存到别处
         /// </summary>
-        private bool isSaveReplace = false;
+        public bool IsSaveReplace { get; set; } = false;
 
         /// <summary>
         /// 仅打印首页
         /// </summary>
-        private bool isOnlyFirtPage = true;
+        public bool IsOnlyFirtPage { get; set; } = true;
 
         /// <summary>
         /// 打印所有页面
         /// </summary>
-        private bool isAllPages = false;
+        public bool IsAllPages { get; set; } = false;
 
         /// <summary>
         /// 水印是否缩放
         /// </summary>
-        private bool isScale = false;
+        public bool IsScale { get; set; } = false;
 
         /// <summary>
         /// 水印是否铺满
         /// </summary>
-        private bool isFull = false;
+        public bool IsFitFull { get; set; } = false;
+
+        /// <summary>
+        /// 水印宽度
+        /// </summary>
+        public int MarkWidth { get; set; } = 10;
+
+        /// <summary>
+        /// 水印高度
+        /// </summary>
+        public int MarkHeight { get; set; } = 10;
 
         /// <summary>
         /// 源文件（夹）路径
         /// </summary>
-        private string sourceFilePath;
-        private List<string> sourceFilePathList = new List<string>();
+        public string SourceFilePath { get; set; }
 
         /// <summary>
         /// 目标文件（夹）路径
         /// </summary>
-        private string destinationFilePath;
-        private List<string> destinationFilePathList = new List<string>();
+        public string DestinationFilePath { get; set; }
+
+        /// <summary>
+        /// 水印文件路径
+        /// </summary>
+        public string MarkFilePath { get; set; }
 
         /// <summary>
         /// 要处理的工作页
         /// </summary>
-        private string page;
-        private List<int> pageList = new List<int>();
+        public string Pages { get; set; }
 
         /// <summary>
         /// 当前预览页
         /// </summary>
-        private int previewPageNum = 0;
+        public int PreviewPageNum { get; set; } = 0;
 
         #endregion
+
+        /// <summary>
+        /// 数据绑定事件
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            #region 数据绑定
+            DataContext = this;
+            radioButtonFile.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSingleFile"));
+            radioButtonSaveReplace.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSaveReplace"));
+            radioButtonPage1.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsOnlyFirtPage"));
+            radioButtonPageAll.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsAllPages"));
+            radioButtonScale.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsScale"));
+            radioButtonFull.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsFitFull"));
+
+            textBoxPath.SetBinding(TipTextBox.TextProperty, new Binding("SourceFilePath")
+            { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Mode = BindingMode.TwoWay });
+
+            textBoxNewPath.SetBinding(TipTextBox.TextProperty, new Binding("DestinationFilePath")
+            { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Mode = BindingMode.TwoWay });
+
+            textBoxMarkPath.SetBinding(TipTextBox.TextProperty, new Binding("MarkFilePath")
+            { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Mode = BindingMode.TwoWay });
+
+            textBoxMarkWidth.SetBinding(TipTextBox.TextProperty, new Binding("MarkWidth")
+            { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Mode = BindingMode.TwoWay });
+            textBoxMarkHeight.SetBinding(TipTextBox.TextProperty, new Binding("MarkHeight")
+            { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Mode = BindingMode.TwoWay });
+
+            buttonSaveAs.SetBinding(Button.IsEnabledProperty, new Binding("IsChecked") { Source = radioButtonSaveAs });
+            textBoxNewPath.SetBinding(TipTextBox.IsEnabledProperty, new Binding("IsChecked") { Source = radioButtonSaveAs });
+
+            textBoxPages.SetBinding(TipTextBox.IsEnabledProperty, new Binding("IsChecked") { Source = radioButtonPageSet });
+
+            #endregion
         }
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)
@@ -106,14 +164,13 @@ namespace PdfWaterMark
 
         private void ButtonOpen_Click(object sender, RoutedEventArgs e)
         {
-            UpdateData();
             CommonOpenFileDialog dialog = new CommonOpenFileDialog()
             {
                 AddToMostRecentlyUsedList = true,
                 Multiselect = false
             };
 
-            if (isSigleFile)
+            if (IsSigleFile)
             {
                 dialog.Title = "打开文件";
                 dialog.IsFolderPicker = false;
@@ -133,8 +190,7 @@ namespace PdfWaterMark
 
         private void ButtonSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            UpdateData();
-            if (isSigleFile)
+            if (IsSigleFile)
             {
                 CommonSaveFileDialog dialog = new CommonSaveFileDialog()
                 {
@@ -164,7 +220,6 @@ namespace PdfWaterMark
 
         private void ButtonMarkOpen_Click(object sender, RoutedEventArgs e)
         {
-            UpdateData();
             CommonOpenFileDialog dialog = new CommonOpenFileDialog()
             {
                 Title = "打开印章文件",
@@ -173,7 +228,7 @@ namespace PdfWaterMark
             dialog.Filters.Add(new CommonFileDialogFilter("图像文件", "*.jpg,*.png,*.bmp"));
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                textBoxWaterMarkPath.Text = dialog.FileName;
+                textBoxMarkPath.Text = dialog.FileName;
             }
         }
 
@@ -190,99 +245,12 @@ namespace PdfWaterMark
 
         }
 
-        private void RadioButtonSave_Checked(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (radioButtonSaveAs.IsChecked == true)
-                {
-                    textBoxNewPath.IsEnabled = true;
-                    buttonSaveAs.IsEnabled = true;
-                }
-                else
-                {
-                    textBoxNewPath.IsEnabled = false;
-                    buttonSaveAs.IsEnabled = false;
-                }
-            }
-            catch { }
-        }
-
-        private void RadioButtonPage_Checked(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (radioButtonPageSet.IsChecked == true)
-                    textBoxPages.IsEnabled = true;
-                else
-                    textBoxPages.IsEnabled = false;
-            }
-            catch { }
-        }
-
         /// <summary>
         /// 根据显示刷新内容
         /// </summary>
         private bool UpdateData()
         {
-            try
-            {
-                // 处理文件还是文件夹
-                if (radioButtonFile.IsChecked == true)
-                    isSigleFile = true;
-                else
-                    isSigleFile = false;
 
-                sourceFilePath = textBoxPath.Text;
-
-                // 另存为还是覆盖保存
-                if (radioButtonSaveReplace.IsChecked == true)
-                    isSaveReplace = true;
-                else
-                    isSaveReplace = false;
-
-                destinationFilePath = textBoxNewPath.Text;
-
-                // 要处理的页面
-                if (radioButtonPage1.IsChecked == true)
-                {
-                    isOnlyFirtPage = true;
-                    isAllPages = false;
-                }
-                else if (radioButtonPageAll.IsChecked == true)
-                {
-                    isOnlyFirtPage = false;
-                    isAllPages = true;
-                }
-                else
-                {
-                    isOnlyFirtPage = false;
-                    isAllPages = false;
-                    page = textBoxPages.Text;
-                }
-
-                // 水印缩放
-                if (radioButtonCenter.IsChecked == true)
-                {
-                    isScale = false;
-                    isFull = false;
-                }
-                else if (radioButtonScale.IsChecked == true)
-                {
-                    isScale = true;
-                    isFull = false;
-                }
-                else
-                {
-                    isScale = false;
-                    isFull = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
 
             return true;
         }
