@@ -14,6 +14,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using Patagames.Pdf;
+using Patagames.Pdf.Net;
+using Patagames.Pdf.Enums;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.IO;
 
 namespace PdfWaterMark
 {
@@ -29,6 +35,11 @@ namespace PdfWaterMark
         private List<string> destinationFilePathList = new List<string>();
 
         private List<int> pageList = new List<int>();
+
+        private int previewPageNum;
+        private int previewPageQty;
+
+        private BitmapImage previewImage;
 
         #endregion
 
@@ -81,32 +92,32 @@ namespace PdfWaterMark
         /// <summary>
         /// 水印宽度
         /// </summary>
-        public int MarkWidth { get; set; } = 10;
+        public float MarkWidth { get; set; } = 10;
 
         /// <summary>
         /// 水印高度
         /// </summary>
-        public int MarkHeight { get; set; } = 10;
+        public float MarkHeight { get; set; } = 10;
 
         /// <summary>
         /// 水印左边距
         /// </summary>
-        public int MarkMarginLeft { get; set; } = 10;
+        public float MarkMarginLeft { get; set; } = 10;
 
         /// <summary>
         /// 水印上边距
         /// </summary>
-        public int MarkMarginTop { get; set; } = 10;
+        public float MarkMarginTop { get; set; } = 10;
 
         /// <summary>
         /// 水印右边距
         /// </summary>
-        public int MarkMarginRight { get; set; } = 10;
+        public float MarkMarginRight { get; set; } = 10;
 
         /// <summary>
         /// 水印下边距
         /// </summary>
-        public int MarkMarginBottom { get; set; } = 10;
+        public float MarkMarginBottom { get; set; } = 10;
 
 
         /// <summary>
@@ -117,12 +128,42 @@ namespace PdfWaterMark
         /// <summary>
         /// 当前预览页
         /// </summary>
-        public int PreviewPageNum { get; set; } = 0;
+        public int PreviewPageNum
+        {
+            get => previewPageNum;
+            set
+            {
+                if (Equals(value, previewPageNum))
+                    return;
+                previewPageNum = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PreviewPageNum)));
+            }
+        }
 
         /// <summary>
         /// 当前文档总页数预览页
         /// </summary>
-        public int PreviewPageQty { get; set; } = 0;
+        public int PreviewPageQty
+        {
+            get => previewPageQty;
+            set
+            {
+                if (Equals(value, previewPageQty))
+                    return;
+                previewPageQty = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PreviewPageQty)));
+            }
+        }
+
+        public BitmapImage PreviewImage
+        {
+            get => previewImage;
+            set
+            {
+                previewImage = value;
+                imagePreview.Source = previewImage;
+            }
+        }
 
         #endregion
 
@@ -137,6 +178,9 @@ namespace PdfWaterMark
 
             #region 数据绑定
             DataContext = this;
+
+            // PDF初始化
+            PdfCommon.Initialize();
 
             // 考虑前后端分离，绑定的操作做好由前端完成
             //radioButtonFile.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSingleFile"));
@@ -170,6 +214,55 @@ namespace PdfWaterMark
 
         private void ButtonStart_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                using (var doc = PdfDocument.Load(@"C:\Users\Sniper\Documents\1.pdf"))
+                {
+                    var page = doc.Pages[0];
+
+                    // 渐进式加载页面
+                    page.StartProgressiveLoad();
+                    while (page.ContinueProgressiveLoad() == ProgressiveStatus.ToBeContinued)
+                    {
+                        Console.WriteLine($"Parsing...");
+                    }
+
+                    int width = (int)page.Width;
+                    int height = (int)page.Height;
+
+                    using (var bitmap = new PdfBitmap(width, height, true))
+                    {
+                        bitmap.FillRect(0, 0, width, height, FS_COLOR.White);
+
+                        Console.WriteLine($"Start progressive render");
+                        ProgressiveStatus status = page.StartProgressiveRender(bitmap, 0, 0, width, height, PageRotate.Normal, RenderFlags.FPDF_ANNOT, null);
+                        while (status == ProgressiveStatus.ToBeContinued)
+                        {
+                            Console.WriteLine($"Render in progress...");
+                            status = page.ContinueProgressiveLoad();
+                        }
+                        PreviewImage = BitmapToBitmapImage(new Bitmap(bitmap.Image));
+                        //bitmap.Image.Save(@"C:\Users\Sniper\Documents\sample.png", ImageFormat.Png);
+                    }
+
+
+                    //创建字体
+                    var font = PdfFont.CreateStock(doc, "Arial");
+
+                    //创建文本对象并将其添加到页面
+                    var txt = PdfTextObject.Create("Hello World!", 10, 10, font, 80);
+                    page.PageObjects.Add(txt);
+
+                    //生成页面内容
+                    page.GenerateContent();
+
+                    doc.Save(@"C:\Users\Sniper\Documents\2.pdf", SaveFlags.NoIncremental);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void ButtonAbout_Click(object sender, RoutedEventArgs e)
@@ -248,7 +341,7 @@ namespace PdfWaterMark
                 Title = "打开印章文件",
                 AddToMostRecentlyUsedList = true,
             };
-            dialog.Filters.Add(new CommonFileDialogFilter("图像文件", "*.jpg,*.png,*.bmp"));
+            dialog.Filters.Add(new CommonFileDialogFilter("图像文件", "*.png"));
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 textBoxMarkPath.Text = dialog.FileName;
@@ -257,9 +350,40 @@ namespace PdfWaterMark
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (sender == toggleButtonBottomCenter)
+            if (sender == radioButtonCenter)
             {
-
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = false;
+            }
+            else if (sender == radioButtonTopLeft)
+            {
+                textBoxLeftOffset.IsEnabled = true;
+                textBoxTopOffset.IsEnabled = true;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = false;
+            }
+            else if (sender == radioButtonTopRight)
+            {
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = true;
+                textBoxRightOffset.IsEnabled = true;
+                textBoxBottomOffset.IsEnabled = false;
+            }
+            else if (sender == radioButtonBottomLeft)
+            {
+                textBoxLeftOffset.IsEnabled = true;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = true;
+            }
+            else if (sender == radioButtonBottomRight)
+            {
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = true;
+                textBoxBottomOffset.IsEnabled = true;
             }
         }
 
@@ -268,6 +392,49 @@ namespace PdfWaterMark
 
         }
 
+        /// <summary>
+        /// Bitmap --> BitmapImage
+        /// </summary>
+        /// <param name="bitmap">Bitmap</param>
+        /// <returns></returns>
+        public static BitmapImage BitmapToBitmapImage(Bitmap bitmap)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                bitmap.Save(stream, ImageFormat.Png); // 坑点：格式选Bmp时，不带透明度
 
+                stream.Position = 0;
+                BitmapImage result = new BitmapImage();
+                result.BeginInit();
+                // According to MSDN, "The default OnDemand cache option retains access to the stream until the image is needed."
+                // Force the bitmap to load right now so we can dispose the stream.
+                result.CacheOption = BitmapCacheOption.OnLoad;
+                result.StreamSource = stream;
+                result.EndInit();
+                result.Freeze();
+                return result;
+            }
+        }
+
+
+        /// <summary>
+        /// BitmapImage --> Bitmap
+        /// </summary>
+        /// <param name="bitmapImage">BitmapImage</param>
+        /// <returns></returns>
+        public static Bitmap BitmapImageToBitmap(BitmapImage bitmapImage)
+        {
+            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+                enc.Save(outStream);
+                Bitmap bitmap = new Bitmap(outStream);
+
+                return new Bitmap(bitmap);
+            }
+        }
     }
 }
