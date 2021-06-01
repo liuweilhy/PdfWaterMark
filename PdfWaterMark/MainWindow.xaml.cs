@@ -30,12 +30,6 @@ namespace PdfWaterMark
     {
         #region  私有变量
 
-        private List<string> sourceFilePathList = new List<string>();
-
-        private List<string> destinationFilePathList = new List<string>();
-
-        private List<int> pageList = new List<int>();
-
         private int previewPageNum;
         private int previewPageQty;
 
@@ -216,7 +210,7 @@ namespace PdfWaterMark
         {
             try
             {
-                using (var doc = PdfDocument.Load(@"C:\Users\Sniper\Documents\1.pdf"))
+                using (var doc = PdfDocument.Load(@"C:\Users\Sniper\Documents\A3.pdf"))
                 {
                     var page = doc.Pages[0];
 
@@ -227,8 +221,31 @@ namespace PdfWaterMark
                         Console.WriteLine($"Parsing...");
                     }
 
+                    //PDF unit size is
+                    float pdfDpi = 72.0f;
+                    if (page.Dictionary.ContainsKey("UserUnit"))
+                        pdfDpi = page.Dictionary["UserUnit"].As<Patagames.Pdf.Net.BasicTypes.PdfTypeNumber>().FloatValue / 72;
+
+                    //The actual width and height will be
                     int width = (int)page.Width;
                     int height = (int)page.Height;
+
+                    // 添加图章
+                    using (Bitmap waterMark = Bitmap.FromFile(@"C:\Users\Sniper\Documents\wm.png") as Bitmap)
+                    {
+                        PdfBitmap bitmap = new PdfBitmap(waterMark.Width, waterMark.Height, true);
+                        using (var g = Graphics.FromImage(bitmap.Image))
+                        {
+                            g.DrawImage(waterMark, 0, 0, waterMark.Width / 2, waterMark.Height / 2);
+                            g.DrawImage(waterMark, waterMark.Width / 2, waterMark.Height / 2, waterMark.Width / 2, waterMark.Height / 2);
+                        }
+                        PdfImageObject imageObject = PdfImageObject.Create(doc, bitmap, 0, 0);
+                        imageObject.Matrix = new FS_MATRIX(waterMark.Width, 0, 0, waterMark.Height, 0, 0);
+                        page.PageObjects.Add(imageObject);
+                    }
+
+                    //生成页面内容
+                    page.GenerateContent();
 
                     using (var bitmap = new PdfBitmap(width, height, true))
                     {
@@ -241,20 +258,13 @@ namespace PdfWaterMark
                             Console.WriteLine($"Render in progress...");
                             status = page.ContinueProgressiveLoad();
                         }
+
+
                         PreviewImage = BitmapToBitmapImage(new Bitmap(bitmap.Image));
+
                         //bitmap.Image.Save(@"C:\Users\Sniper\Documents\sample.png", ImageFormat.Png);
+
                     }
-
-
-                    //创建字体
-                    var font = PdfFont.CreateStock(doc, "Arial");
-
-                    //创建文本对象并将其添加到页面
-                    var txt = PdfTextObject.Create("Hello World!", 10, 10, font, 80);
-                    page.PageObjects.Add(txt);
-
-                    //生成页面内容
-                    page.GenerateContent();
 
                     doc.Save(@"C:\Users\Sniper\Documents\2.pdf", SaveFlags.NoIncremental);
                 }
