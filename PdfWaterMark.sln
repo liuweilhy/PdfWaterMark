@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.28307.1525
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfWaterMark", "PdfWaterMark\PdfWaterMark.csproj", "{B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{3EAE2E41-4EA8-455C-B291-E83EC50B4B59}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B} = {B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +20,10 @@ Global
 		{B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0E0E7C5-DBD5-403D-9A01-BB05C8E78F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EAE2E41-4EA8-455C-B291-E83EC50B4B59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EAE2E41-4EA8-455C-B291-E83EC50B4B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EAE2E41-4EA8-455C-B291-E83EC50B4B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EAE2E41-4EA8-455C-B291-E83EC50B4B59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

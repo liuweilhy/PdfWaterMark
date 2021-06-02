@@ -12,12 +12,13 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ToggleButton}">
-                            <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="border" Margin="0" Background="#00FFFFFF" BorderBrush="#FF000000" BorderThickness="1" SnapsToDevicePixels="True">
+                            <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="border" Margin="0" Background="#00FFFFFF" BorderBrush="LightGray" BorderThickness="1" SnapsToDevicePixels="True">
                                 <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="true">
                                     <Setter Property="Background" TargetName="border" Value="LightBlue"/>
+                                    <Setter Property="BorderBrush" TargetName="border" Value="Black"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -52,10 +53,10 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <RadioButton x:Name="radioButtonFile" Grid.Row="0" Grid.Column="0" GroupName="group1" Content="单个文件" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"
-                                 IsChecked="{Binding IsSingleFile}"/>
+                                 IsChecked="{Binding PdfFileProcess.IsSingleFile}"/>
                     <RadioButton x:Name="radioButtonFolder" Grid.Row="0"  Grid.Column="1" GroupName="group1" IsChecked="True" Content="文件夹下全部" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
                     <RadioButton x:Name="radioButtonSaveReplace" Grid.Row="2" Grid.Column="0" GroupName="group2" Content="覆盖保存" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"
-                                 IsChecked="{Binding IsSaveReplace}"/>
+                                 IsChecked="{Binding PdfFileProcess.IsSaveReplace}"/>
                     <RadioButton x:Name="radioButtonSaveAs" Grid.Row="2"  Grid.Column="1" GroupName="group2" IsChecked="True" Content="另存为" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1"/>
                     <Grid Grid.Row="1" Grid.ColumnSpan="2" >
                         <Grid.ColumnDefinitions>
@@ -63,7 +64,7 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxPath" TipText="待处理的文件（夹）路径" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding SourceFilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                          Text="{Binding PdfFileProcess.SourcePath, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button x:Name="buttonOpen" Content="..." Margin="1,0,1,0" Grid.Column="1" Height="23" VerticalAlignment="Top" Click="ButtonOpen_Click"/>
                     </Grid>
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" >
@@ -72,7 +73,7 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxNewPath" TipText="另存为的文件（夹）路径" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding DestinationFilePath, UpdateSourceTrigger=PropertyChanged}"
+                                          Text="{Binding PdfFileProcess.TargetPath, UpdateSourceTrigger=PropertyChanged}"
                                           IsEnabled="{Binding ElementName=radioButtonSaveAs, Path=IsChecked}"/>
                         <Button x:Name="buttonSaveAs" Content="..." Margin="1,0,1,0" Grid.Column="1" Click="ButtonSaveAs_Click"
                                 IsEnabled="{Binding ElementName=radioButtonSaveAs, Path=IsChecked}"/>
@@ -91,13 +92,13 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <RadioButton x:Name="radioButtonPage1" Grid.Row="0" Grid.Column="0" GroupName="group3" Content="第1页" VerticalAlignment="Center"
-                                 IsChecked="{Binding IsOnlyFirtPage}"/>
+                                 IsChecked="{Binding PdfFileProcess.IsOnlyFirtPage}"/>
                     <RadioButton x:Name="radioButtonPageAll" Grid.Row="0" Grid.Column="1" GroupName="group3" Content="全部页面" VerticalAlignment="Center"
-                                 IsChecked="{Binding IsAllPages}"/>
+                                 IsChecked="{Binding PdfFileProcess.IsAllPages}"/>
                     <RadioButton x:Name="radioButtonPageSet" Grid.Row="0" Grid.Column="2" GroupName="group3" Content="指定页面" VerticalAlignment="Center" IsChecked="False"/>
                     <local:TipTextBox x:Name="textBoxPages" TipText="各页用空格或,或;隔开，如：1,2,3" Grid.Row="1" Grid.ColumnSpan="3"  VerticalAlignment="Center"
                                       IsEnabled="{Binding ElementName=radioButtonPageSet, Path=IsChecked}"
-                                      Text="{Binding Pages, UpdateSourceTrigger=PropertyChanged}"/>
+                                      Text="{Binding PdfFileProcess.Pages, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
             </GroupBox>
             <GroupBox Header="水印、印章" Margin="5" Grid.Row="2" BorderBrush="Gray">
@@ -107,20 +108,16 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" >
-                        <TextBlock Text="尺寸：" VerticalAlignment="Center"/>
-                        <TextBox x:Name="textBoxMarkWidth" Width="34" VerticalAlignment="Center"
+                        <TextBlock Text="尺寸(mm)：" VerticalAlignment="Center"/>
+                        <TextBox x:Name="textBoxMarkWidth" Width="38" VerticalAlignment="Center" HorizontalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                                 Text="{Binding MarkWidth, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="x" VerticalAlignment="Center"/>
-                        <TextBox x:Name="textBoxMarkHeight" Width="34" VerticalAlignment="Center"
+                                 Text="{Binding PdfFileProcess.MarkWidth, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="x" VerticalAlignment="Center" Margin="2,0,2,0"/>
+                        <TextBox x:Name="textBoxMarkHeight" Width="38" VerticalAlignment="Center" HorizontalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                                 Text="{Binding MarkHeight, UpdateSourceTrigger=PropertyChanged}"/>
-                        <RadioButton x:Name="radioButtonMarkCenter" Content="居中" Margin="2,0,2,0" VerticalAlignment="Center"
-                                     IsChecked="True"/>
-                        <RadioButton x:Name="radioButtonScale" Content="缩放" Margin="0" VerticalAlignment="Center"
-                                     IsChecked="{Binding IsScale}"/>
-                        <RadioButton x:Name="radioButtonFull" Content="填满" Margin="2,0,2,0" VerticalAlignment="Center"
-                                     IsChecked="{Binding IsFitFull}"/>
+                                 Text="{Binding PdfFileProcess.MarkHeight, UpdateSourceTrigger=PropertyChanged}"/>
+                        <CheckBox x:Name="checkBoxProportional" Content="等比例缩放" Margin="4,0,0,0" VerticalAlignment="Center"
+                                     IsChecked="{Binding PdfFileProcess.IsProportional}"/>
                     </StackPanel>
                     <Grid Grid.Row="1" Grid.ColumnSpan="2" >
                         <Grid.ColumnDefinitions>
@@ -128,7 +125,7 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxMarkPath" TipText="印章路径，支持透明PNG图像" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding MarkFilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                          Text="{Binding PdfFileProcess.MarkFilePath, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button x:Name="buttonMarkOpen" Content="..." Margin="1,0,1,0" Grid.Column="1" Click="ButtonMarkOpen_Click"/>
                     </Grid>
                 </Grid>
@@ -136,7 +133,7 @@
             <Grid Grid.Row="3" Background="LightGray">
                 <Viewbox >
                     <Border Margin="2" BorderBrush="DarkGray" BorderThickness="1">
-                        <Grid Background="White" Width="260" Height="180" >
+                        <Grid Background="White" Width="268" Height="180" >
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="1"/>
@@ -160,18 +157,26 @@
                             <Border Grid.Row="0" Grid.Column="5" Grid.RowSpan="7" BorderBrush="DarkGray" BorderThickness="0.5"/>
                             <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="7" BorderBrush="DarkGray" BorderThickness="0.5"/>
                             <TextBox x:Name="textBoxLeftOffset" Grid.Row="2" Grid.Column="0" Grid.RowSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
-                                     Text="{Binding MarkMarginLeft, UpdateSourceTrigger=PropertyChanged}"/>
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     Text="{Binding PdfFileProcess.MarginLeft, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBox x:Name="textBoxTopOffset" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
-                                     Text="{Binding MarkMarginTop, UpdateSourceTrigger=PropertyChanged}"/>
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     Text="{Binding PdfFileProcess.MarginTop, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBox x:Name="textBoxRightOffset" Grid.Row="2" Grid.Column="6" Grid.RowSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
-                                     Text="{Binding MarkMarginRight, UpdateSourceTrigger=PropertyChanged}"/>
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     Text="{Binding PdfFileProcess.MarginRight, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBox x:Name="textBoxBottomOffset"  Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
-                                     Text="{Binding MarkMarginBottom, UpdateSourceTrigger=PropertyChanged}"/>
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     Text="{Binding PdfFileProcess.MarginBottom, UpdateSourceTrigger=PropertyChanged}"/>
                             <RadioButton x:Name="radioButtonTopLeft" Width="32" Height="32" Grid.Row="2" Grid.Column="2" Content="↖" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
+                            <RadioButton x:Name="radioButtonTopCenter" Width="32" Height="32" Grid.Row="2" Grid.Column="3" Content="↑" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                             <RadioButton x:Name="radioButtonTopRight" Width="32" Height="32" Grid.Row="2" Grid.Column="4" Content="↗" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
+                            <RadioButton x:Name="radioButtonRightCenter" Width="32" Height="32" Grid.Row="3" Grid.Column="4" Content="→" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                             <RadioButton x:Name="radioButtonBottomLeft" Width="32" Height="32" Grid.Row="4" Grid.Column="2" Content="↙" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
+                            <RadioButton x:Name="radioButtonBottomCenter" Width="32" Height="32" Grid.Row="4" Grid.Column="3" Content="↓" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                             <RadioButton x:Name="radioButtonBottomRight" Width="32" Height="32" Grid.Row="4" Grid.Column="4" Content="↘" VerticalAlignment="Center" IsChecked="True" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
-                            <RadioButton x:Name="radioButtonCenter" Width="32" Height="32" Grid.Row="3" Grid.Column="3" Content="" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
+                            <RadioButton x:Name="radioButtonLeftCenter" Width="32" Height="32" Grid.Row="3" Grid.Column="2" Content="←" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
+                            <RadioButton x:Name="radioButtonCenter" Width="32" Height="32" Grid.Row="3" Grid.Column="3" Content="⚪" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                         </Grid>
                     </Border>
                 </Viewbox>
@@ -200,7 +205,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
-            <Image x:Name="imagePreview" Source="{Binding ImageSource, Mode=TwoWay}" Margin="5"/>
+            <Image x:Name="imagePreview" Source="{Binding PdfFileProcess.PreviewImage}" Margin="5"/>
             <Grid Grid.Row="1" Width="140" Height="30">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30"/>
@@ -229,11 +234,11 @@
                 </Button>
                 <TextBox x:Name="textBoxCurrentPage" Grid.Column="1" Margin="3" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                         Text="{Binding PreviewPageNum, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding PdfFileProcess.PreviewPageNum, UpdateSourceTrigger=PropertyChanged}"
                          TextChanged="TextBoxCurrentPage_TextChanged"/>
                 <TextBlock Text="/" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="textBlockPageNum" Grid.Column="3" Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center"
-                         Text="{Binding PreviewPageQty, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding PdfFileProcess.PreviewPageQty, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
         </Grid>
     </Grid>

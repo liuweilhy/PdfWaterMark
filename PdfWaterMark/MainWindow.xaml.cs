@@ -26,138 +26,14 @@ namespace PdfWaterMark
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window
     {
-        #region  私有变量
-
-        private int previewPageNum;
-        private int previewPageQty;
-
-        private BitmapImage previewImage;
-
-        #endregion
-
         #region 属性
         /// <summary>
-        /// 仅处理单文件，否则处理文件夹下所有pdf文件
+        /// PDF文件处理类
         /// </summary>
-        public bool IsSigleFile { get; set; } = false;
+        public PdfFileProcess PdfFileProcess { get; set; }
 
-        /// <summary>
-        /// 覆盖保存，否则另存到别处
-        /// </summary>
-        public bool IsSaveReplace { get; set; } = false;
-
-        /// <summary>
-        /// 仅打印首页
-        /// </summary>
-        public bool IsOnlyFirtPage { get; set; } = true;
-
-        /// <summary>
-        /// 打印所有页面
-        /// </summary>
-        public bool IsAllPages { get; set; } = false;
-
-        /// <summary>
-        /// 水印是否缩放
-        /// </summary>
-        public bool IsScale { get; set; } = false;
-
-        /// <summary>
-        /// 水印是否铺满
-        /// </summary>
-        public bool IsFitFull { get; set; } = false;
-
-        /// <summary>
-        /// 源文件（夹）路径
-        /// </summary>
-        public string SourceFilePath { get; set; }
-
-        /// <summary>
-        /// 目标文件（夹）路径
-        /// </summary>
-        public string DestinationFilePath { get; set; }
-
-        /// <summary>
-        /// 水印文件路径
-        /// </summary>
-        public string MarkFilePath { get; set; }
-
-        /// <summary>
-        /// 水印宽度
-        /// </summary>
-        public float MarkWidth { get; set; } = 10;
-
-        /// <summary>
-        /// 水印高度
-        /// </summary>
-        public float MarkHeight { get; set; } = 10;
-
-        /// <summary>
-        /// 水印左边距
-        /// </summary>
-        public float MarkMarginLeft { get; set; } = 10;
-
-        /// <summary>
-        /// 水印上边距
-        /// </summary>
-        public float MarkMarginTop { get; set; } = 10;
-
-        /// <summary>
-        /// 水印右边距
-        /// </summary>
-        public float MarkMarginRight { get; set; } = 10;
-
-        /// <summary>
-        /// 水印下边距
-        /// </summary>
-        public float MarkMarginBottom { get; set; } = 10;
-
-
-        /// <summary>
-        /// 要处理的工作页
-        /// </summary>
-        public string Pages { get; set; }
-
-        /// <summary>
-        /// 当前预览页
-        /// </summary>
-        public int PreviewPageNum
-        {
-            get => previewPageNum;
-            set
-            {
-                if (Equals(value, previewPageNum))
-                    return;
-                previewPageNum = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PreviewPageNum)));
-            }
-        }
-
-        /// <summary>
-        /// 当前文档总页数预览页
-        /// </summary>
-        public int PreviewPageQty
-        {
-            get => previewPageQty;
-            set
-            {
-                if (Equals(value, previewPageQty))
-                    return;
-                previewPageQty = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PreviewPageQty)));
-            }
-        }
-
-        public BitmapImage PreviewImage
-        {
-            get => previewImage;
-            set
-            {
-                previewImage = value;
-                imagePreview.Source = previewImage;
-            }
-        }
 
         #endregion
 
@@ -168,15 +44,17 @@ namespace PdfWaterMark
 
         public MainWindow()
         {
+            // 创建PDF处理对象
+            PdfFileProcess = new PdfFileProcess();
+            // 解决TextBox小数点输入问题
+            FrameworkCompatibilityPreferences.KeepTextBoxDisplaySynchronizedWithTextProperty = false;
+            // 初始化控件
             InitializeComponent();
 
             #region 数据绑定
             DataContext = this;
 
-            // PDF初始化
-            PdfCommon.Initialize();
-
-            // 考虑前后端分离，绑定的操作做好由前端完成
+            // 绑定的操作由xmal完成
             //radioButtonFile.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSingleFile"));
             //radioButtonSaveReplace.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSaveReplace"));
             //radioButtonPage1.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsOnlyFirtPage"));
@@ -210,6 +88,7 @@ namespace PdfWaterMark
         {
             try
             {
+                PdfFileProcess.GetType();
                 using (var doc = PdfDocument.Load(@"C:\Users\Sniper\Documents\A3.pdf"))
                 {
                     var page = doc.Pages[0];
@@ -220,7 +99,6 @@ namespace PdfWaterMark
                     {
                         Console.WriteLine($"Parsing...");
                     }
-
                     //PDF unit size is
                     float pdfDpi = 72.0f;
                     if (page.Dictionary.ContainsKey("UserUnit"))
@@ -259,8 +137,7 @@ namespace PdfWaterMark
                             status = page.ContinueProgressiveLoad();
                         }
 
-
-                        PreviewImage = BitmapToBitmapImage(new Bitmap(bitmap.Image));
+                        PdfFileProcess.PreviewImage = PdfFileProcess.BitmapToBitmapImage(new Bitmap(bitmap.Image));
 
                         //bitmap.Image.Save(@"C:\Users\Sniper\Documents\sample.png", ImageFormat.Png);
 
@@ -296,7 +173,7 @@ namespace PdfWaterMark
                 Multiselect = false
             };
 
-            if (IsSigleFile)
+            if (PdfFileProcess.IsSigleFile)
             {
                 dialog.Title = "打开文件";
                 dialog.IsFolderPicker = false;
@@ -316,7 +193,7 @@ namespace PdfWaterMark
 
         private void ButtonSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (IsSigleFile)
+            if (PdfFileProcess.IsSigleFile)
             {
                 CommonSaveFileDialog dialog = new CommonSaveFileDialog()
                 {
@@ -362,6 +239,8 @@ namespace PdfWaterMark
         {
             if (sender == radioButtonCenter)
             {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;
@@ -369,6 +248,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonTopLeft)
             {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
                 textBoxLeftOffset.IsEnabled = true;
                 textBoxTopOffset.IsEnabled = true;
                 textBoxRightOffset.IsEnabled = false;
@@ -376,6 +257,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonTopRight)
             {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = true;
                 textBoxRightOffset.IsEnabled = true;
@@ -383,6 +266,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonBottomLeft)
             {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
                 textBoxLeftOffset.IsEnabled = true;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;
@@ -390,10 +275,48 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonBottomRight)
             {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = true;
                 textBoxBottomOffset.IsEnabled = true;
+            }
+            else if (sender == radioButtonTopCenter)
+            {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = true;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = false;
+            }
+            else if (sender == radioButtonRightCenter)
+            {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = true;
+                textBoxBottomOffset.IsEnabled = false;
+            }
+            else if (sender == radioButtonBottomCenter)
+            {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
+                textBoxLeftOffset.IsEnabled = false;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = true;
+            }
+            else if (sender == radioButtonLeftCenter)
+            {
+                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
+                textBoxLeftOffset.IsEnabled = true;
+                textBoxTopOffset.IsEnabled = false;
+                textBoxRightOffset.IsEnabled = false;
+                textBoxBottomOffset.IsEnabled = false;
             }
         }
 
@@ -402,49 +325,6 @@ namespace PdfWaterMark
 
         }
 
-        /// <summary>
-        /// Bitmap --> BitmapImage
-        /// </summary>
-        /// <param name="bitmap">Bitmap</param>
-        /// <returns></returns>
-        public static BitmapImage BitmapToBitmapImage(Bitmap bitmap)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                bitmap.Save(stream, ImageFormat.Png); // 坑点：格式选Bmp时，不带透明度
 
-                stream.Position = 0;
-                BitmapImage result = new BitmapImage();
-                result.BeginInit();
-                // According to MSDN, "The default OnDemand cache option retains access to the stream until the image is needed."
-                // Force the bitmap to load right now so we can dispose the stream.
-                result.CacheOption = BitmapCacheOption.OnLoad;
-                result.StreamSource = stream;
-                result.EndInit();
-                result.Freeze();
-                return result;
-            }
-        }
-
-
-        /// <summary>
-        /// BitmapImage --> Bitmap
-        /// </summary>
-        /// <param name="bitmapImage">BitmapImage</param>
-        /// <returns></returns>
-        public static Bitmap BitmapImageToBitmap(BitmapImage bitmapImage)
-        {
-            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
-
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
-                enc.Save(outStream);
-                Bitmap bitmap = new Bitmap(outStream);
-
-                return new Bitmap(bitmap);
-            }
-        }
     }
 }
