@@ -305,99 +305,6 @@ namespace PdfWaterMark
         }
 
         /// <summary>
-        /// 设置印章
-        /// </summary>
-        /// <param name="markPath">印章文件路径</param>
-        /// <param name="markWidth">印象宽度（毫米）</param>
-        /// <param name="markHeight">印象高度（毫米）</param>
-        /// <param name="hAlign">水平布局</param>
-        /// <param name="vAlign">竖直布局</param>
-        /// <param name="margin">边距</param>
-        /// <param name="isProportional">等比例缩放</param>
-        public void SetMark(string markPath, double markWidth, double markHeight,
-                            HorizontalAlignment hAlign, VerticalAlignment vAlign,
-                            Thickness margin, bool isProportional=false)
-        {
-            // 打开印章图片
-            Bitmap bitmap = Bitmap.FromFile(markPath) as Bitmap;
-            if (bitmap == null)
-                throw new Exception("打开印章文件失败！");
-
-            // 检查印章宽度和高度
-            if (markWidth <= 0 || markHeight <= 0)
-                throw new Exception("印章宽度和高度必须大于零!");
-
-            // 初始化PdfBitmap
-            markBitmap?.Dispose();
-            int markWidthPixel = (int)(markWidth / inch2mm * pdfDpi);
-            int markHeightPixel = (int)(markHeight / inch2mm * pdfDpi);
-            markBitmap = new PdfBitmap(markWidthPixel, markHeightPixel, true);
-
-            // 画印章
-            using (var g = Graphics.FromImage(markBitmap.Image))
-            {
-                g.Clear(Color.White);
-                g.DrawImage(bitmap, 0, 0, markWidthPixel, markHeightPixel);
-            }
-
-            // 设置边距
-            this.Margin = margin;
-        }
-
-        /// <summary>
-        /// 获取PDF文件路径列表
-        /// </summary>
-        /// <param name="sourcePath">源文件（夹）路径</param>
-        /// <returns>PDF文件路径列表</returns>
-        public List<string> GetSourceFilePathList(string sourcePath)
-        {
-            // 文件列表
-            List<string> sourceFilePathList = new List<string>();
-
-            // 添加文件
-            // 如果是PDF文件
-            if (File.Exists(sourcePath) && Path.GetExtension(sourcePath).ToLower() == "pdf")
-            {
-                sourceFilePathList.Add(Path.GetFullPath(sourcePath));
-            }
-            // 如果是文件夹
-            else if (Directory.Exists(sourcePath))
-            {
-                sourceFilePathList.AddRange(Directory.GetFiles(sourcePath, "*.pdf", SearchOption.AllDirectories));
-            }
-            return sourceFilePathList;
-        }
-
-        /// <summary>
-        /// 设置新的PDF文件路径列表
-        /// </summary>
-        /// <param name="targetPath">目标文件（夹）路径</param>
-        /// <param name="isFile">目标是文件还是文件夹</param>
-        /// <returns>新的PDF文件路径列表</returns>
-        public List<string> SetTargetFilePathList(string targetPath, bool isFile = true)
-        {
-            // 文件列表
-            List<string> targetFilePathList = new List<string>();
-
-            // 添加文件
-            // 如果是PDF文件
-            if (isFile)
-            {
-                targetFilePathList.Add(Path.GetFullPath(targetPath));
-            }
-            // 是文件夹
-            else
-            {
-                targetPath = targetPath.TrimEnd('\\') + '\\';
-                foreach (var path in sourceFilePathList)
-                {
-                    targetFilePathList.Add(targetPath + Path.GetFileName(path));
-                }
-            }
-            return targetFilePathList;
-        }
-
-        /// <summary>
         /// Bitmap --> BitmapImage
         /// </summary>
         /// <param name="bitmap">Bitmap</param>
@@ -437,6 +344,102 @@ namespace PdfWaterMark
                 return new Bitmap(bitmap);
             }
         }
+        #endregion
+
+        #region 内部方法
+        /// <summary>
+        /// 获取PDF文件路径列表
+        /// </summary>
+        /// <param name="sourcePath">源文件（夹）路径</param>
+        /// <returns>PDF文件路径列表</returns>
+        protected List<string> GetSourceFilePathList(string sourcePath)
+        {
+            // 文件列表
+            List<string> sourceFilePathList = new List<string>();
+
+            // 添加文件
+            // 如果是PDF文件
+            if (File.Exists(sourcePath) && Path.GetExtension(sourcePath).ToLower() == "pdf")
+            {
+                sourceFilePathList.Add(Path.GetFullPath(sourcePath));
+            }
+            // 如果是文件夹
+            else if (Directory.Exists(sourcePath))
+            {
+                sourceFilePathList.AddRange(Directory.GetFiles(sourcePath, "*.pdf", SearchOption.AllDirectories));
+            }
+            return sourceFilePathList;
+        }
+
+        /// <summary>
+        /// 设置新的PDF文件路径列表
+        /// </summary>
+        /// <param name="targetPath">目标文件（夹）路径</param>
+        /// <param name="isFile">目标是文件还是文件夹</param>
+        /// <returns>新的PDF文件路径列表</returns>
+        protected List<string> SetTargetFilePathList(string targetPath, bool isFile = true)
+        {
+            // 文件列表
+            List<string> targetFilePathList = new List<string>();
+
+            // 添加文件
+            // 如果是PDF文件
+            if (isFile)
+            {
+                targetFilePathList.Add(Path.GetFullPath(targetPath));
+            }
+            // 是文件夹
+            else
+            {
+                targetPath = targetPath.TrimEnd('\\') + '\\';
+                foreach (var path in sourceFilePathList)
+                {
+                    targetFilePathList.Add(targetPath + Path.GetFileName(path));
+                }
+            }
+            return targetFilePathList;
+        }
+
+        /// <summary>
+        /// 设置印章
+        /// </summary>
+        /// <param name="markPath">印章文件路径</param>
+        /// <param name="markWidth">印象宽度（毫米）</param>
+        /// <param name="markHeight">印象高度（毫米）</param>
+        /// <param name="hAlign">水平布局</param>
+        /// <param name="vAlign">竖直布局</param>
+        /// <param name="margin">边距</param>
+        /// <param name="isProportional">等比例缩放</param>
+        protected void SetMark(string markPath, double markWidth, double markHeight,
+                            HorizontalAlignment hAlign, VerticalAlignment vAlign,
+                            Thickness margin, bool isProportional = false)
+        {
+            // 打开印章图片
+            Bitmap bitmap = Bitmap.FromFile(markPath) as Bitmap;
+            if (bitmap == null)
+                throw new Exception("打开印章文件失败！");
+
+            // 检查印章宽度和高度
+            if (markWidth <= 0 || markHeight <= 0)
+                throw new Exception("印章宽度和高度必须大于零!");
+
+            // 初始化PdfBitmap
+            markBitmap?.Dispose();
+            int markWidthPixel = (int)(markWidth / inch2mm * pdfDpi);
+            int markHeightPixel = (int)(markHeight / inch2mm * pdfDpi);
+            markBitmap = new PdfBitmap(markWidthPixel, markHeightPixel, true);
+
+            // 画印章
+            using (var g = Graphics.FromImage(markBitmap.Image))
+            {
+                g.Clear(Color.White);
+                g.DrawImage(bitmap, 0, 0, markWidthPixel, markHeightPixel);
+            }
+
+            // 设置边距
+            this.Margin = margin;
+        }
+
         #endregion
     }
 }
