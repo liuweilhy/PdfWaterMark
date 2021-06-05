@@ -52,7 +52,7 @@ namespace PdfWaterMark
             InitializeComponent();
 
             #region 数据绑定
-            DataContext = this;
+            DataContext = PdfFileProcess;
 
             // 绑定的操作由xmal完成
             //radioButtonFile.SetBinding(RadioButton.IsCheckedProperty, new Binding("IsSingleFile"));
@@ -88,63 +88,7 @@ namespace PdfWaterMark
         {
             try
             {
-                PdfFileProcess.GetType();
-                using (var doc = PdfDocument.Load(@"C:\Users\Sniper\Documents\A3.pdf"))
-                {
-                    var page = doc.Pages[0];
-
-                    // 渐进式加载页面
-                    page.StartProgressiveLoad();
-                    while (page.ContinueProgressiveLoad() == ProgressiveStatus.ToBeContinued)
-                    {
-                        Console.WriteLine($"Parsing...");
-                    }
-                    //PDF unit size is
-                    float pdfDpi = 72.0f;
-                    if (page.Dictionary.ContainsKey("UserUnit"))
-                        pdfDpi = page.Dictionary["UserUnit"].As<Patagames.Pdf.Net.BasicTypes.PdfTypeNumber>().FloatValue / 72;
-
-                    //The actual width and height will be
-                    int width = (int)page.Width;
-                    int height = (int)page.Height;
-
-                    // 添加图章
-                    using (Bitmap waterMark = Bitmap.FromFile(@"C:\Users\Sniper\Documents\wm.png") as Bitmap)
-                    {
-                        PdfBitmap bitmap = new PdfBitmap(waterMark.Width, waterMark.Height, true);
-                        using (var g = Graphics.FromImage(bitmap.Image))
-                        {
-                            g.DrawImage(waterMark, 0, 0, waterMark.Width / 2, waterMark.Height / 2);
-                            g.DrawImage(waterMark, waterMark.Width / 2, waterMark.Height / 2, waterMark.Width / 2, waterMark.Height / 2);
-                        }
-                        PdfImageObject imageObject = PdfImageObject.Create(doc, bitmap, 0, 0);
-                        imageObject.Matrix = new FS_MATRIX(waterMark.Width, 0, 0, waterMark.Height, 0, 0);
-                        page.PageObjects.Add(imageObject);
-                    }
-
-                    //生成页面内容
-                    page.GenerateContent();
-
-                    using (var bitmap = new PdfBitmap(width, height, true))
-                    {
-                        bitmap.FillRect(0, 0, width, height, FS_COLOR.White);
-
-                        Console.WriteLine($"Start progressive render");
-                        ProgressiveStatus status = page.StartProgressiveRender(bitmap, 0, 0, width, height, PageRotate.Normal, RenderFlags.FPDF_ANNOT, null);
-                        while (status == ProgressiveStatus.ToBeContinued)
-                        {
-                            Console.WriteLine($"Render in progress...");
-                            status = page.ContinueProgressiveLoad();
-                        }
-
-                        PdfFileProcess.PreviewImage = PdfFileProcess.BitmapToBitmapImage(new Bitmap(bitmap.Image));
-
-                        //bitmap.Image.Save(@"C:\Users\Sniper\Documents\sample.png", ImageFormat.Png);
-
-                    }
-
-                    doc.Save(@"C:\Users\Sniper\Documents\2.pdf", SaveFlags.NoIncremental);
-                }
+                PdfFileProcess.ImprintMark();
             }
             catch (Exception ex)
             {
@@ -173,7 +117,7 @@ namespace PdfWaterMark
                 Multiselect = false
             };
 
-            if (PdfFileProcess.IsSigleFile)
+            if (PdfFileProcess.IsSingleFile)
             {
                 dialog.Title = "打开文件";
                 dialog.IsFolderPicker = false;
@@ -193,7 +137,7 @@ namespace PdfWaterMark
 
         private void ButtonSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (PdfFileProcess.IsSigleFile)
+            if (PdfFileProcess.IsSingleFile)
             {
                 CommonSaveFileDialog dialog = new CommonSaveFileDialog()
                 {
@@ -239,8 +183,8 @@ namespace PdfWaterMark
         {
             if (sender == radioButtonCenter)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Center;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;
@@ -248,8 +192,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonTopLeft)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Top;
                 textBoxLeftOffset.IsEnabled = true;
                 textBoxTopOffset.IsEnabled = true;
                 textBoxRightOffset.IsEnabled = false;
@@ -257,8 +201,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonTopRight)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Top;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = true;
                 textBoxRightOffset.IsEnabled = true;
@@ -266,8 +210,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonBottomLeft)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Bottom;
                 textBoxLeftOffset.IsEnabled = true;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;
@@ -275,8 +219,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonBottomRight)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Bottom;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = true;
@@ -284,8 +228,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonTopCenter)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Top;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Top;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = true;
                 textBoxRightOffset.IsEnabled = false;
@@ -293,8 +237,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonRightCenter)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Right;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Right;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Center;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = true;
@@ -302,8 +246,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonBottomCenter)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Center;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Bottom;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Center;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Bottom;
                 textBoxLeftOffset.IsEnabled = false;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;
@@ -311,8 +255,8 @@ namespace PdfWaterMark
             }
             else if (sender == radioButtonLeftCenter)
             {
-                PdfFileProcess.HorizontalAlignment = HorizontalAlignment.Left;
-                PdfFileProcess.VerticalAlignment = VerticalAlignment.Center;
+                PdfFileProcess.MarkHorizontalAlignment = HorizontalAlignment.Left;
+                PdfFileProcess.MarkVerticalAlignment = VerticalAlignment.Center;
                 textBoxLeftOffset.IsEnabled = true;
                 textBoxTopOffset.IsEnabled = false;
                 textBoxRightOffset.IsEnabled = false;

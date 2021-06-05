@@ -22,13 +22,13 @@ namespace UnitTestProject
             }
             Console.WriteLine("-----------only file---------------------------");
             pdf.TargetPath = @"F:\1";
-            pdf.IsSigleFile = true;
+            pdf.IsSingleFile = true;
             foreach(var item in pdf.TargetFilePathList)
             {
                 Console.WriteLine(item);
             }
             Console.WriteLine("-----------folder---------------------------");
-            pdf.IsSigleFile = false;
+            pdf.IsSingleFile = false;
             foreach (var item in pdf.TargetFilePathList)
             {
                 Console.WriteLine(item);
