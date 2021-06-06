@@ -1,7 +1,7 @@
-# PdfWaterMark（Pdf批量添加水印、图章）
+# PdfWaterMark（Pdf文件批量添加水印、图章）
 
 ## 项目介绍
-Pdf批量添加水印、图章的工具，特别适合批量图纸盖LOGO。
+Pdf文件批量添加水印、图章的工具，特别适合批量图纸盖LOGO。  
 
 ## 使用方法
 ![1](./images/1.png "Optional title")  
