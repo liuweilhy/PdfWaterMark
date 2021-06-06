@@ -468,7 +468,7 @@ namespace PdfWaterMark
                            HorizontalAlignment hAlign, VerticalAlignment vAlign,
                            Thickness margin, bool isProportional = false)
         {
-            if (isProportional)
+            if (isInPreviewing)
                 return 0;
 
             isInPreviewing = true;
