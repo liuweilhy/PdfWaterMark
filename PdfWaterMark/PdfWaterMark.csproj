@@ -36,6 +36,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ico.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack.1.1.1\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
@@ -55,14 +58,9 @@
     <Reference Include="Patagames.Pdf, Version=8.58.31.46, Culture=neutral, PublicKeyToken=60fd6cf9b15941cf, processorArchitecture=MSIL">
       <HintPath>..\packages\Pdfium.Net.SDK.4.56.2704\lib\net46\Patagames.Pdf.dll</HintPath>
     </Reference>
-    <Reference Include="Patagames.Pdf.WinForms, Version=4.19.16.46, Culture=neutral, PublicKeyToken=60fd6cf9b15941cf, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pdfium.Net.SDK.4.56.2704\lib\net46\Patagames.Pdf.WinForms.dll</HintPath>
-    </Reference>
     <Reference Include="Patagames.Pdf.Wpf, Version=4.19.18.46, Culture=neutral, PublicKeyToken=60fd6cf9b15941cf, processorArchitecture=MSIL">
       <HintPath>..\packages\Pdfium.Net.SDK.4.56.2704\lib\net46\Patagames.Pdf.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Syncfusion.Shared.Wpf, Version=19.1460.0.54, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
-    <Reference Include="Syncfusion.Tools.WPF, Version=19.1460.0.54, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
