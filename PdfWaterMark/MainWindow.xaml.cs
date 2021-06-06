@@ -96,6 +96,8 @@ namespace PdfWaterMark
                 grid1.IsEnabled = false;
                 // 启动处理
                 PdfFileProcess.ImprintMark();
+                //Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                //    new Action(() => { PdfFileProcess.ImprintMark(); }));
             }
             catch (Exception ex)
             {

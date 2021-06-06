@@ -68,6 +68,8 @@ namespace PdfWaterMark
         private const double inch2mm = 25.4;
         // 正在处理预览
         private bool isInPreviewing = false;
+        // 正在处理的文档
+        private string currentDocPath = null;
         #endregion
 
         #region  属性
@@ -85,6 +87,10 @@ namespace PdfWaterMark
                 sourcePath = value;
                 NotifyPropertyChanged();
                 TotalFileNum = sourceFilePathList.Count();
+                if (totalFileNum > 0)
+                    currentDocPath = sourceFilePathList[0];
+                else
+                    currentDocPath = null;
                 ProgressedFileNum = 0;
                 ProgressInfo = string.Format(@"({0})个文件待处理", TotalFileNum);
                 Preview();
@@ -462,6 +468,11 @@ namespace PdfWaterMark
                            HorizontalAlignment hAlign, VerticalAlignment vAlign,
                            Thickness margin, bool isProportional = false)
         {
+            if (isProportional)
+                return 0;
+
+            isInPreviewing = true;
+
             // 需处理的文档总数
             int n = 0;
             // 处理过的文档总数
@@ -519,7 +530,8 @@ namespace PdfWaterMark
                     // 文档是否已改变
                     bool isChanged = false;
 
-                    using (var doc = PdfDocument.Load(sourceFilePathList[d]))
+                    currentDocPath = sourceFilePathList[d];
+                    using (var doc = PdfDocument.Load(currentDocPath))
                     {
                         // 总页数
                         PreviewPageQty = doc.Pages.Count;
@@ -552,6 +564,7 @@ namespace PdfWaterMark
                 }
             }
 
+            isInPreviewing = false;
             // 返回处理的文档数
             return count;
         }
@@ -874,7 +887,7 @@ namespace PdfWaterMark
         }
 
         /// <summary>
-        /// 生成预览
+        /// 生成第一个预览
         /// </summary>
         protected void Preview()
         {
@@ -885,7 +898,7 @@ namespace PdfWaterMark
 
                 isInPreviewing = true;
 
-                if (sourceFilePathList?.Count == 0)
+                if (currentDocPath is null)
                 {
                     PreviewImage = null;
                     return;
@@ -898,10 +911,11 @@ namespace PdfWaterMark
                 List<int> pageList = new List<int>();
                 pageList = IntArray(pages);
 
-                using (var doc = PdfDocument.Load(sourceFilePathList[0]))
+                using (var doc = PdfDocument.Load(currentDocPath))
                 {
                     // 总页数
                     PreviewPageQty = doc.Pages.Count;
+
                     if (previewPageNum <= 0)
                         PreviewPageNum = 1;
                     else if (previewPageNum > previewPageQty)
