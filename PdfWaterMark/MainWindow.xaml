@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PdfWaterMark"
         mc:Ignorable="d"
-        Title="PDF文件添加水印、图章" Height="560" Width="680" MinHeight="480" MinWidth="296" WindowStartupLocation="CenterScreen" FontSize="14" Icon="logo.png">
+        Title="PDF文件添加水印、图章" Height="560" Width="760" MinHeight="480" MinWidth="296" WindowStartupLocation="CenterScreen" FontSize="14" Icon="logo.png">
     <Grid>
         <Grid.Resources>
             <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
@@ -40,7 +40,7 @@
                 <RowDefinition />
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
-            <GroupBox Header="要处理的PDF文件" Margin="5" Grid.Row="0" BorderBrush="Gray">
+            <GroupBox x:Name="groupbox1" Header="要处理的PDF文件" Margin="5" Grid.Row="0" BorderBrush="Gray">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -64,7 +64,7 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxPath" TipText="待处理的文件（夹）路径" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                          Text="{Binding SourcePath}"/>
                         <Button x:Name="buttonOpen" Content="..." Margin="1,0,1,0" Grid.Column="1" Height="23" VerticalAlignment="Top" Click="ButtonOpen_Click"/>
                     </Grid>
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" >
@@ -73,14 +73,14 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxNewPath" TipText="另存为的文件（夹）路径" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}"
+                                          Text="{Binding TargetPath}"
                                           IsEnabled="{Binding ElementName=radioButtonSaveAs, Path=IsChecked}"/>
                         <Button x:Name="buttonSaveAs" Content="..." Margin="1,0,1,0" Grid.Column="1" Click="ButtonSaveAs_Click"
                                 IsEnabled="{Binding ElementName=radioButtonSaveAs, Path=IsChecked}"/>
                     </Grid>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="文件页" Margin="5" Grid.Row="1" BorderBrush="Gray">
+            <GroupBox x:Name="groupbox2" Header="文件页" Margin="5" Grid.Row="1" BorderBrush="Gray">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -98,10 +98,10 @@
                     <RadioButton x:Name="radioButtonPageSet" Grid.Row="0" Grid.Column="2" GroupName="group3" Content="指定页面" VerticalAlignment="Center" IsChecked="False"/>
                     <local:TipTextBox x:Name="textBoxPages" TipText="各页用空格或,或;隔开，如：1,2,3" Grid.Row="1" Grid.ColumnSpan="3"  VerticalAlignment="Center"
                                       IsEnabled="{Binding ElementName=radioButtonPageSet, Path=IsChecked}"
-                                      Text="{Binding Pages, UpdateSourceTrigger=PropertyChanged}"/>
+                                      Text="{Binding Pages}"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="水印、印章" Margin="5" Grid.Row="2" BorderBrush="Gray">
+            <GroupBox x:Name="groupbox3" Header="水印、印章" Margin="5" Grid.Row="2" BorderBrush="Gray">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -111,11 +111,11 @@
                         <TextBlock Text="尺寸(mm)：" VerticalAlignment="Center"/>
                         <TextBox x:Name="textBoxMarkWidth" Width="38" VerticalAlignment="Center" HorizontalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                                 Text="{Binding MarkWidth, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding MarkWidth}"/>
                         <TextBlock Text="x" VerticalAlignment="Center" Margin="2,0,2,0"/>
                         <TextBox x:Name="textBoxMarkHeight" Width="38" VerticalAlignment="Center" HorizontalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                                 Text="{Binding MarkHeight, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding MarkHeight}"/>
                         <CheckBox x:Name="checkBoxProportional" Content="等比例缩放" Margin="4,0,0,0" VerticalAlignment="Center"
                                      IsChecked="{Binding IsProportional}"/>
                     </StackPanel>
@@ -125,13 +125,13 @@
                             <ColumnDefinition Width="35"/>
                         </Grid.ColumnDefinitions>
                         <local:TipTextBox x:Name="textBoxMarkPath" TipText="印章路径，支持透明PNG图像" Margin="2,0,3,0" VerticalContentAlignment="Center"
-                                          Text="{Binding MarkFilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                          Text="{Binding MarkFilePath}"/>
                         <Button x:Name="buttonMarkOpen" Content="..." Margin="1,0,1,0" Grid.Column="1" Click="ButtonMarkOpen_Click"/>
                     </Grid>
                 </Grid>
             </GroupBox>
             <Grid Grid.Row="3" Background="LightGray">
-                <Viewbox >
+                <Viewbox x:Name="viewbox1">
                     <Border Margin="2" BorderBrush="DarkGray" BorderThickness="1">
                         <Grid Background="White" Width="268" Height="180" >
                             <Grid.RowDefinitions>
@@ -158,16 +158,16 @@
                             <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="7" BorderBrush="DarkGray" BorderThickness="0.5"/>
                             <TextBox x:Name="textBoxLeftOffset" Grid.Row="2" Grid.Column="0" Grid.RowSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
                                      InputMethod.IsInputMethodEnabled="False"
-                                     Text="{Binding MarginLeft, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Text="{Binding MarginLeft}"/>
                             <TextBox x:Name="textBoxTopOffset" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
                                      InputMethod.IsInputMethodEnabled="False"
-                                     Text="{Binding MarginTop, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Text="{Binding MarginTop}"/>
                             <TextBox x:Name="textBoxRightOffset" Grid.Row="2" Grid.Column="6" Grid.RowSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
                                      InputMethod.IsInputMethodEnabled="False"
-                                     Text="{Binding MarginRight, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Text="{Binding MarginRight}"/>
                             <TextBox x:Name="textBoxBottomOffset"  Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0"
                                      InputMethod.IsInputMethodEnabled="False"
-                                     Text="{Binding MarginBottom, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Text="{Binding MarginBottom}"/>
                             <RadioButton x:Name="radioButtonTopLeft" Width="32" Height="32" Grid.Row="2" Grid.Column="2" Content="↖" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                             <RadioButton x:Name="radioButtonTopCenter" Width="32" Height="32" Grid.Row="2" Grid.Column="3" Content="↑" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
                             <RadioButton x:Name="radioButtonTopRight" Width="32" Height="32" Grid.Row="2" Grid.Column="4" Content="↗" VerticalAlignment="Center" IsChecked="False" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource ToggleButtonStyle1}" Checked="ToggleButton_Checked"/>
@@ -187,7 +187,9 @@
                     <ColumnDefinition Width="70"/>
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
-                <ProgressBar x:Name="progressBar" Grid.Column="0" Margin="2" />
+                <ProgressBar x:Name="progressBar" Maximum="{Binding TotalFileNum}" Value="{Binding ProgressedFileNum}" Grid.Column="0" Margin="2" />
+                <TextBlock x:Name="textBlockProgress" Grid.Column="0" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
+                           Text="{Binding ProgressInfo}"/>
                 <Button x:Name="buttonStart" Content="开始(_S)" Grid.Column="1" Margin="2" Click="ButtonStart_Click"/>
                 <Button x:Name="buttonAbout" Grid.Column="2" Margin="2" Content="?" FontWeight="Bold" Foreground="White" Click="ButtonAbout_Click">
                     <Button.Template>
@@ -200,7 +202,7 @@
                 </Button>
             </Grid>
         </Grid>
-        <Grid Grid.Column="2" Background="LightGray">
+        <Grid x:Name="grid1" Grid.Column="2" Background="LightGray">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="30"/>
@@ -234,11 +236,10 @@
                 </Button>
                 <TextBox x:Name="textBoxCurrentPage" Grid.Column="1" Margin="3" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                  InputMethod.IsInputMethodEnabled="False"
-                         Text="{Binding PreviewPageNum, UpdateSourceTrigger=PropertyChanged}"
-                         TextChanged="TextBoxCurrentPage_TextChanged"/>
+                         Text="{Binding PreviewPageNum}"/>
                 <TextBlock Text="/" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="textBlockPageNum" Grid.Column="3" Margin="3" VerticalAlignment="Center" HorizontalAlignment="Center"
-                         Text="{Binding PreviewPageQty, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding PreviewPageQty}"/>
             </Grid>
         </Grid>
     </Grid>

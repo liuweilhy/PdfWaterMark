@@ -88,25 +88,46 @@ namespace PdfWaterMark
         {
             try
             {
+                // 禁用界面控件
+                groupbox1.IsEnabled = false;
+                groupbox2.IsEnabled = false;
+                groupbox3.IsEnabled = false;
+                viewbox1.IsEnabled = false;
+                grid1.IsEnabled = false;
+                // 启动处理
                 PdfFileProcess.ImprintMark();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // 启用界面控件
+                groupbox1.IsEnabled = true;
+                groupbox2.IsEnabled = true;
+                groupbox3.IsEnabled = true;
+                viewbox1.IsEnabled = true;
+                grid1.IsEnabled = true;
             }
         }
 
         private void ButtonAbout_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("ButtonAbout_Click");
+            AboutWindow aboutWindow = new AboutWindow();
+            aboutWindow.ShowDialog();
         }
 
         private void ButtonPrev_Click(object sender, RoutedEventArgs e)
         {
+            if (PdfFileProcess.PreviewPageNum > 1)
+                PdfFileProcess.PreviewPageNum--;
         }
 
         private void ButtonNext_Click(object sender, RoutedEventArgs e)
         {
+            if (PdfFileProcess.PreviewPageNum < PdfFileProcess.PreviewPageQty)
+                PdfFileProcess.PreviewPageNum++;
         }
 
         private void ButtonOpen_Click(object sender, RoutedEventArgs e)
@@ -131,7 +152,7 @@ namespace PdfWaterMark
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                textBoxPath.Text = dialog.FileName;
+                PdfFileProcess.SourcePath = dialog.FileName;
             }
         }
 
@@ -147,7 +168,11 @@ namespace PdfWaterMark
                 dialog.Filters.Add(new CommonFileDialogFilter("PDF文件", "*.pdf"));
                 if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    textBoxNewPath.Text = dialog.FileName;
+                    string path = dialog.FileName;
+                    // 如果没有pdf扩展名，则加上扩展名
+                    if (!path.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                        path += ".pdf";
+                    PdfFileProcess.TargetPath = path;
                 }
             }
             else
@@ -160,7 +185,7 @@ namespace PdfWaterMark
                 };
                 if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    textBoxNewPath.Text = dialog.FileName;
+                    PdfFileProcess.TargetPath = dialog.FileName;
                 }
             }
         }
@@ -172,10 +197,10 @@ namespace PdfWaterMark
                 Title = "打开印章文件",
                 AddToMostRecentlyUsedList = true,
             };
-            dialog.Filters.Add(new CommonFileDialogFilter("图像文件", "*.png"));
+            dialog.Filters.Add(new CommonFileDialogFilter("图像文件", "*.png;*.jpg;*.bmp"));
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                textBoxMarkPath.Text = dialog.FileName;
+                PdfFileProcess.MarkFilePath = dialog.FileName;
             }
         }
 
@@ -263,12 +288,6 @@ namespace PdfWaterMark
                 textBoxBottomOffset.IsEnabled = false;
             }
         }
-
-        private void TextBoxCurrentPage_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
-
 
     }
 }

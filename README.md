@@ -1,37 +1,20 @@
-# PdfWaterMark（还没写完，不要拉取！）
+# PdfWaterMark（Pdf批量添加水印、图章）
 
-#### 项目介绍
-Pdf批量添加水印、盖章的工具，特别适合批量图纸盖LOGO。
+## 项目介绍
+Pdf批量添加水印、图章的工具，特别适合批量图纸盖LOGO。
 
-#### 软件架构
-软件架构说明
+## 使用方法
+![1](./images/1.png "Optional title")  
+![2](./images/2.png "Optional title")  
 
+## 关于本工具
+本工具基于.Net 4.6的WPF框架，使用Visual Studio 2017开发。未使用经典的MVVM构架，简化为MV构架。  
+开发中使用了如下开源库：  
++ Pdfium.Net
++ WindowsAPICodePack
+如果你发现本程序有什么问题或好的建议，请与本人联系。我的邮箱是：liuweilhy@163.com  
+by liuweilhy 2021年6月6日
 
-#### 安装教程
-
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 使用说明
-
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 参与贡献
-
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
-
-
-#### 码云特技
-
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [http://git.mydoc.io/](http://git.mydoc.io/)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## 项目源码及发行版下载
++ 源码下载（Gitee）：[https://gitee.com/liuweilhy/pdf-water-mark](https://gitee.com/liuweilhy/pdf-water-mark)
++ 发行版下载（Gitee），请选择最新版：[https://gitee.com/liuweilhy/pdf-water-mark/releases](https://gitee.com/liuweilhy/pdf-water-mark/releases)

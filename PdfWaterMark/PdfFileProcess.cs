@@ -51,14 +51,23 @@ namespace PdfWaterMark
         private double markHeight = 25.0;
         // 水印边距
         private Thickness margin = new Thickness(45.0, 20.0, 45.0, 20.0);
-
-        private double pdfDpi = 72.0;
-        private const double inch2mm = 25.4;
+        // 总文档数
+        private int totalFileNum = 1;
+        // 已处理文档数
+        private int progressedFileNum = 0;
+        // 处理进度
+        private string progressInfo = string.Empty;
+        // 当前预览页
         private int previewPageNum;
+        // 当前文档总页数
         private int previewPageQty;
-
+        // 预览图
         private BitmapImage previewImage;
 
+        // 英寸转毫米
+        private const double inch2mm = 25.4;
+        // 正在处理预览
+        private bool isInPreviewing = false;
         #endregion
 
         #region  属性
@@ -75,6 +84,10 @@ namespace PdfWaterMark
                 sourceFilePathList = GetSourceFilePathList(value);
                 sourcePath = value;
                 NotifyPropertyChanged();
+                TotalFileNum = sourceFilePathList.Count();
+                ProgressedFileNum = 0;
+                ProgressInfo = string.Format(@"({0})个文件待处理", TotalFileNum);
+                Preview();
             }
         }
 
@@ -115,8 +128,15 @@ namespace PdfWaterMark
                 if (Object.Equals(markFilePath, value))
                     return;
                 markFilePath = value;
-                SetPdfBitmap(value, MarkWidth, MarkHeight, IsProportional);
                 NotifyPropertyChanged();
+
+                // 反馈宽度和高度
+                if (!(Bitmap.FromFile(value) is Bitmap bitmap))
+                    throw new Exception("打开印章文件失败！");
+                double dpi = bitmap.HorizontalResolution;
+                MarkWidth = bitmap.Width * inch2mm / dpi;
+                MarkHeight = bitmap.Height * inch2mm / dpi;
+                Preview();
             }
         }
 
@@ -151,7 +171,12 @@ namespace PdfWaterMark
         public bool IsOnlyFirtPage
         {
             get => isOnlyFirtPage;
-            set { isOnlyFirtPage = value; NotifyPropertyChanged(); }
+            set
+            {
+                isOnlyFirtPage = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -160,7 +185,12 @@ namespace PdfWaterMark
         public bool IsAllPages
         {
             get => isAllPages;
-            set { isAllPages = value; NotifyPropertyChanged(); }
+            set
+            {
+                isAllPages = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -175,6 +205,7 @@ namespace PdfWaterMark
                     return;
                 pages = value;
                 NotifyPropertyChanged();
+                Preview();
             }
         }
 
@@ -184,7 +215,12 @@ namespace PdfWaterMark
         public HorizontalAlignment MarkHorizontalAlignment
         {
             get => markHorizontalAlignment;
-            set { markHorizontalAlignment = value; NotifyPropertyChanged(); }
+            set
+            {
+                markHorizontalAlignment = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -193,7 +229,12 @@ namespace PdfWaterMark
         public VerticalAlignment MarkVerticalAlignment
         {
             get => markVerticalAlignment;
-            set { markVerticalAlignment = value; NotifyPropertyChanged(); }
+            set
+            {
+                markVerticalAlignment = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -202,7 +243,12 @@ namespace PdfWaterMark
         public double MarkWidth
         {
             get => markWidth;
-            set { markWidth = value; NotifyPropertyChanged(); }
+            set
+            {
+                markWidth = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -211,7 +257,12 @@ namespace PdfWaterMark
         public double MarkHeight
         {
             get => markHeight;
-            set { markHeight = value; NotifyPropertyChanged(); }
+            set
+            {
+                markHeight = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -219,7 +270,12 @@ namespace PdfWaterMark
         /// </summary>
         public Thickness Margin {
             get => margin;
-            set { margin = value; NotifyPropertyChanged(); }
+            set
+            {
+                margin = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -228,7 +284,12 @@ namespace PdfWaterMark
         public double MarginLeft
         {
             get => margin.Left;
-            set { margin.Left = value; NotifyPropertyChanged(); }
+            set
+            {
+                margin.Left = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -237,7 +298,12 @@ namespace PdfWaterMark
         public double MarginTop
         {
             get => margin.Top;
-            set { margin.Top = value; NotifyPropertyChanged(); }
+            set
+            {
+                margin.Top = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -246,7 +312,12 @@ namespace PdfWaterMark
         public double MarginRight
         {
             get => margin.Right;
-            set { margin.Right = value; NotifyPropertyChanged(); }
+            set
+            {
+                margin.Right = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -255,7 +326,12 @@ namespace PdfWaterMark
         public double MarginBottom
         {
             get => margin.Bottom;
-            set { margin.Bottom = value; NotifyPropertyChanged(); }
+            set
+            {
+                margin.Bottom = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
         }
 
         /// <summary>
@@ -264,7 +340,35 @@ namespace PdfWaterMark
         public bool IsProportional
         {
             get => isProportional;
-            set { isProportional = value; NotifyPropertyChanged(); }
+            set
+            {
+                isProportional = value;
+                NotifyPropertyChanged();
+                Preview();
+            }
+        }
+
+        // 总文档数
+        public int TotalFileNum
+        {
+            get => totalFileNum;
+            set { totalFileNum = value; NotifyPropertyChanged(); }
+        }
+
+        // 已处理文档数
+        public int ProgressedFileNum
+        {
+            get => progressedFileNum;
+            set { progressedFileNum = value; NotifyPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// 处理进度
+        /// </summary>
+        public string ProgressInfo
+        {
+            get => progressInfo;
+            set { progressInfo = value; NotifyPropertyChanged(); }
         }
 
         /// <summary>
@@ -279,11 +383,12 @@ namespace PdfWaterMark
                     return;
                 previewPageNum = value;
                 NotifyPropertyChanged();
+                Preview();
             }
         }
 
         /// <summary>
-        /// 当前文档总页数预览页
+        /// 当前文档总页数
         /// </summary>
         public int PreviewPageQty
         {
@@ -365,11 +470,23 @@ namespace PdfWaterMark
             // 源文件列表
             sourceFilePathList = GetSourceFilePathList(sourcePath);
             n = sourceFilePathList.Count();
+            if (n == 0)
+                throw new Exception("未找到源PDF文件！");
+            else
+            {
+                TotalFileNum = n;
+                ProgressedFileNum = 0;
+            }
+
 
             // 目标文档列表
             bool isSigleFile = File.Exists(sourcePath);
             if (targetPath != null)
+            {
                 targetFilePathList = SetTargetFilePathList(targetPath, isSigleFile);
+                if (n != targetFilePathList.Count)
+                    throw new Exception("目标文件（夹）路径不合法！");
+            }
 
             // 指定页面列表
             List<int> pageList = new List<int>();
@@ -385,23 +502,53 @@ namespace PdfWaterMark
                 // 依次处理各个文件
                 for (int d = 0; d < sourceFilePathList.Count; d++)
                 {
+                    // 目标文件
+                    string tempPath;
+                    string tarPath;
+                    if (targetPath is null)
+                    {
+                        tempPath = sourceFilePathList[d] + ".tmp";
+                        tarPath = sourceFilePathList[d];
+                    }
+                    else
+                    {
+                        tempPath = targetFilePathList[d] + ".tmp";
+                        tarPath = targetFilePathList[d];
+                    }
+
+                    // 文档是否已改变
+                    bool isChanged = false;
+
                     using (var doc = PdfDocument.Load(sourceFilePathList[d]))
                     {
                         // 总页数
-                        previewPageQty = doc.Pages.Count;
+                        PreviewPageQty = doc.Pages.Count;
                         for (int i = 0; i < previewPageQty; i++)
                         {
-                            if (!isAllPages && !pageList.Contains(i+1))
+                            if (!isAllPages && !pageList.Contains(i + 1))
                                 continue;
                             ImprintMarkOnPage(doc, doc.Pages[i], pdfBitmap, hAlign, vAlign, margin);
+                            isChanged = true;
+                            PreviewPageNum = i + 1;
                         }
-
-                        // 覆盖保存
-                        if (targetPath is null)
-                            doc.Save(SaveFlags.NoIncremental);
-                        else // 换位置保存
-                            doc.Save(targetFilePathList[d], SaveFlags.NoIncremental);
+                        // 如果有变更，则保存临时文件
+                        if (isChanged)
+                        {
+                            doc.Save(tempPath, SaveFlags.NoIncremental);
+                        }
                     }
+
+                    // 如果有变更，则保存临时文件
+                    if (isChanged)
+                    {
+                        File.Delete(tarPath);
+                        File.Move(tempPath, tarPath);
+                    }
+                    else
+                        File.Delete(tempPath);
+                    // 已处理文件数+1
+                    ProgressedFileNum = ++count;
+                    ProgressInfo = string.Format(@"已处理({0} / {1})", count, n);
                 }
             }
 
@@ -431,8 +578,12 @@ namespace PdfWaterMark
         {
             string targetPath = this.targetPath;
             string pages = this.pages;
+
             if (isSaveReplace)
                 targetPath = null;
+            else if (string.IsNullOrWhiteSpace(targetPath))
+                throw new Exception("目标文件（夹）未指定！");
+
             if (isOnlyFirtPage)
                 pages = "1";
             else if (isAllPages)
@@ -554,17 +705,21 @@ namespace PdfWaterMark
         protected PdfBitmap SetPdfBitmap(string markFilePath, double markWidthMM, double markHeightMM, bool isProportional = false)
         {
             // 打开印章图片
-            Bitmap bitmap = Bitmap.FromFile(markFilePath) as Bitmap;
-            if (bitmap == null)
+            if (!File.Exists(markFilePath))
+                throw new Exception("无此印章文件！");
+            if (!(Bitmap.FromFile(markFilePath) is Bitmap bitmap))
                 throw new Exception("打开印章文件失败！");
 
             // 检查印章宽度和高度
             if (markWidthMM <= 0 || markHeightMM <= 0)
                 throw new Exception("印章宽度和高度必须大于零!");
 
+            // DPI
+            double dpi = bitmap.HorizontalResolution;
+
             // 目标PdfBitmap大小（像素）
-            int markWidth = (int)(markWidthMM * pdfDpi / inch2mm);
-            int markHeight = (int)(markHeightMM * pdfDpi / inch2mm);
+            int markWidth = (int)(markWidthMM * dpi / inch2mm);
+            int markHeight = (int)(markHeightMM * dpi / inch2mm);
 
             // 初始化PdfBitmap
             PdfBitmap pdfBitmap = new PdfBitmap(markWidth, markHeight, true);
@@ -622,11 +777,11 @@ namespace PdfWaterMark
             try
             {
                 // 渐进式加载页面
-                page.StartProgressiveLoad();
-                while (page.ContinueProgressiveLoad() == ProgressiveStatus.ToBeContinued)
-                {
-                    Console.WriteLine($"Parsing...");
-                }
+                //page.StartProgressiveLoad();
+                //while (page.ContinueProgressiveLoad() == ProgressiveStatus.ToBeContinued)
+                //{
+                //    Console.WriteLine($"Parsing...");
+                //}
 
                 //PDF unit size is
                 float pdfDpi = 72.0f;
@@ -697,6 +852,82 @@ namespace PdfWaterMark
                 }
             }
             return ints;
+        }
+
+        /// <summary>
+        /// 将PDF页面转换为图片
+        /// </summary>
+        /// <param name="page">PDF页面</param>
+        /// <returns>转换后的Bitmap图</returns>
+        protected static Bitmap PdfPageToBitmap(PdfPage page)
+        {
+            Bitmap bitmap;
+            int width = (int)page.Width;
+            int height = (int)page.Height;
+            using (var pdfBitmap = new PdfBitmap(width, height, true))
+            {
+                pdfBitmap.FillRect(0, 0, width, height, FS_COLOR.White);
+                page.Render(pdfBitmap, 0, 0, width, height, PageRotate.Normal, RenderFlags.FPDF_NONE);
+                bitmap = new Bitmap(pdfBitmap.Image);
+            }
+            return bitmap;
+        }
+
+        /// <summary>
+        /// 生成预览
+        /// </summary>
+        protected void Preview()
+        {
+            try
+            {
+                if (isInPreviewing)
+                    return;
+
+                isInPreviewing = true;
+
+                if (sourceFilePathList?.Count == 0)
+                {
+                    PreviewImage = null;
+                    return;
+                }
+
+                // 指定页面列表
+                string pages = this.pages;
+                if (isOnlyFirtPage)
+                    pages = "1";
+                List<int> pageList = new List<int>();
+                pageList = IntArray(pages);
+
+                using (var doc = PdfDocument.Load(sourceFilePathList[0]))
+                {
+                    // 总页数
+                    PreviewPageQty = doc.Pages.Count;
+                    if (previewPageNum <= 0)
+                        PreviewPageNum = 1;
+                    else if (previewPageNum > previewPageQty)
+                        PreviewPageNum = previewPageQty;
+
+                    try
+                    {
+                        PdfBitmap pdfBitmap = SetPdfBitmap(markFilePath, markWidth, markHeight, isProportional);
+                        if (isAllPages || pageList.Contains(PreviewPageNum))
+                        {
+                            ImprintMarkOnPage(doc, doc.Pages[previewPageNum - 1], pdfBitmap, markHorizontalAlignment, markVerticalAlignment, margin);
+                        }
+                        pdfBitmap.Dispose();
+                    }
+                    finally
+                    {
+                        // 刷新显示
+                        PreviewImage = BitmapToBitmapImage(PdfPageToBitmap(doc.Pages[previewPageNum - 1]));
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                isInPreviewing = false;
+            }
         }
         #endregion
     }
